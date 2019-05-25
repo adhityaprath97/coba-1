@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Live Streaming</title>
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+
+	<script
+	  src="https://code.jquery.com/jquery-3.4.1.js"
+	  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+	  crossorigin="anonymous"></script>
+</head>
+<body>
+	
+	<div class="row">
+		<div class="col-sm-6 text-center" style="margin-top: 16px;">
+			<h2>Lagu di Server</h2>
+			<audio controls id="left-video" playsinline class="mx-auto" preload="metadata">
+				<source src="" type="audio/mpeg">
+			</audio>
+
+		</div>
+		<div class="col-sm-6 text-center" style="margin-top: 16px;">
+			<h2>Lagu Live Streaming</h2>
+			<audio id="right-video" playsinline class="mx-auto" controls></audio>
+		</div>
+		
+	</div>
+
+	<p id="lala"></p>
+	<p id="lili"></p>
+
+	<div id="drop-area">
+	  <div id="progress">
+	  	
+	  </div>
+	</div>
+	
+	<script src="js/main.js" ></script>
+
+	<script type="text/javascript">
+		
+		var listLagu = new Array();
+		var waktu;
+		var x=0;
+		var juragan;
+		var allTimeCurrent=0;
+		var currentTime;
+	  	
+
+		leftVideo.onloadedmetadata = function() {
+    		waktu = document.getElementById("left-video").duration;
+  			document.getElementById("lala").innerHTML = waktu;
+		};
+
+
+		leftVideo.ontimeupdate = function() {checkDuration(); endedMusic();};
+		
+		function checkDuration(){
+			juragan=leftVideo.currentTime;
+			document.getElementById("lili").innerHTML = juragan;
+
+			$('#progress').css('width',(allTimeCurrent+juragan)+'px');
+		}
+
+		function endedMusic(){
+			if (juragan == waktu)
+			{
+				allTimeCurrent+=juragan;
+				x=x+1;
+				leftVideo.setAttribute('src',listLagu[x]);
+				startRecord();
+			}
+		}
+
+
+	
+		// function updateSource1(){
+		// 	leftVideo.setAttribute('src',listLagu[0]);
+		// 	startRecord();
+		// }
+
+		// function updateSource2(){
+		// 	leftVideo.setAttribute('src',listLagu[1]);
+		// 	startRecord();
+		// }
+
+	    let dropArea = document.getElementById('drop-area');
+	    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+	        dropArea.addEventListener(eventName, preventDefaults, false)
+	    })
+
+	    function preventDefaults (e) {
+	        e.preventDefault()
+	        e.stopPropagation()
+	    }
+	    
+	    dropArea.addEventListener('drop', handleDrop, false)
+
+	    function handleDrop(e) {
+	        let dt = e.dataTransfer
+	        let files = dt.files
+	        console.log(files);
+	        var a=0;
+	        while (a<files.length){
+	        	addMusic(files[a]);
+	        	a++;
+	        }
+	        
+	    }
+
+	    function addMusic(music){
+	    	//const kotak = "<div id='musicItem'></div>";
+	    	var kotak = document.createElement('div');
+	    	var title = document.createElement('span');
+	    	title.setAttribute('id','judul');
+	    	title.innerHTML=music.name;
+	    	kotak.append(title);
+	    	kotak.setAttribute('id','musicItem');
+	    	var audio = document.createElement('audio');
+	        var url = URL.createObjectURL(music);
+	        audio.src=url;
+	        audio.addEventListener("loadedmetadata", function(_event) {
+	            var duration = audio.duration;
+	            console.log(secondsToTime(duration));
+	            kotak.style.width=duration + 'px';
+	            $('#drop-area').append(kotak);
+	            
+
+	            if (listLagu.length==0) {
+	            	listLagu.push(url);
+	            	leftVideo.setAttribute('src',listLagu[0]);
+					startRecord();
+	            }
+	            else{
+	            	listLagu.push(url);
+	            }
+
+        	});
+	    }
+
+	</script>
+</body>
+</html>
